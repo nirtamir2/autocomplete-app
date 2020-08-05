@@ -7,18 +7,31 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
-    "styled-components": "^5.0.0"
+    "@ant-design/icons": "^4.2.2",
+    "antd": "^4.5.2",
+    "babel-plugin-import": "^1.13.0",
+    "downshift": "^6.0.2",
+    "next": "^9.5.1",
+    "next-page-transitions": "^1.0.0-beta.2",
+    "postcss-preset-env": "^6.7.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-window": "^1.8.5",
+    "styled-components": "^5.1.1",
+    "use-persisted-state": "^0.3.0",
+    "use-resize-observer": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "12.0.12",
-    "@types/react": "16.8.23",
-    "@types/react-dom": "16.8.4",
-    "@types/styled-components": "5.0.1",
-    "babel-plugin-styled-components": "^1.10.0",
-    "typescript": "3.5.2"
+    "@types/node": "14.0.27",
+    "@types/react": "16.9.44",
+    "@types/react-dom": "16.9.8",
+    "@types/react-window": "^1.8.2",
+    "@types/styled-components": "5.1.2",
+    "@types/use-persisted-state": "^0.3.0",
+    "babel-plugin-inline-react-svg": "^1.1.1",
+    "babel-plugin-styled-components": "^1.11.1",
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.7"
   },
   "license": "ISC"
 }

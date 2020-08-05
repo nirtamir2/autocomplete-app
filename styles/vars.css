@@ -1,0 +1,18 @@
+:root {
+  --gutter: 16px;
+  --gutterSmall: 5px;
+
+  --headerHeight: 100px;
+
+  --headerBackgroundColor: #5b54dd;
+  --borderColor: #ccc;
+  --whiteColor: #ffffff;
+  --hoverColor: #bde4ff;
+  --backgroundColor: #f7f7f7;
+
+  --borderRadius: 2px;
+
+  --fontSizeLarge: 30px;
+
+  --transition-timing-medium: 300ms;
+}
