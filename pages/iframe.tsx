@@ -2,6 +2,11 @@ import React from "react";
 import { SubscribeModalContent } from "../components/SubscribeModalContent";
 import { useSelectedOptions } from "../components/hooks/useSelectedOptions";
 import { useOptions } from "../components/hooks/useOptions";
+import styled from "styled-components";
+
+const Container = styled.div`
+  padding: var(--gutter) ;
+`;
 
 export default function iframe() {
   const [localStorageSelectedItems] = useSelectedOptions();
@@ -22,10 +27,12 @@ export default function iframe() {
   }
 
   return (
-    <SubscribeModalContent
-      initialOptions={localStorageOptions}
-      initialSelectedItems={localStorageSelectedItems}
-      onSave={handleSave}
-    />
+    <Container>
+      <SubscribeModalContent
+        initialOptions={localStorageOptions}
+        initialSelectedItems={localStorageSelectedItems}
+        onSave={handleSave}
+      />
+    </Container>
   );
 }

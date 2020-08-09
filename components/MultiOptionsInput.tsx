@@ -1,10 +1,10 @@
 import React from "react";
 import { Button, Empty, Tag, Tooltip, Typography } from "antd";
-import { useCombobox, useMultipleSelection } from "downshift";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import useResizeObserver from "use-resize-observer";
 import { FixedSizeList } from "react-window";
+import useOnclickOutside from "react-cool-onclickoutside";
 
 interface IProps {
   inputValue: string;
@@ -29,10 +29,12 @@ const StyledFixedSizeOptionsList = styled(FixedSizeList)`
   list-style-type: none;
 `;
 
-const OptionsListItem = styled.li<{ highlighted: boolean }>`
+const OptionsListItem = styled.li`
   padding: var(--gutter);
-  background-color: ${(props) =>
-    props.highlighted ? "var(--hoverColor)" : "var(--whiteColor)"};
+  background-color: var(--whiteColor);
+  :hover {
+    background-color: var(--hoverColor);
+  }
 `;
 
 const Container = styled.div`
@@ -150,10 +152,20 @@ export function MultiOptionsInput(props: IProps) {
   } = props;
 
   const [inputValue, setInputValue] = React.useState("");
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
   const {
     ref: borderedBoxRef,
     width: borderedBoxWidth = 100,
   } = useResizeObserver<HTMLDivElement>();
+  const clickOutsideMenuRef = React.useRef<HTMLDivElement | null>(null);
+
+  useOnclickOutside(
+    () => {
+      setIsMenuOpen(false);
+    },
+    { refs: [borderedBoxRef, clickOutsideMenuRef] }
+  );
 
   function getFilteredItems() {
     return options.filter(
@@ -162,60 +174,6 @@ export function MultiOptionsInput(props: IProps) {
         item.toLowerCase().includes(inputValue.toLowerCase())
     );
   }
-
-  const { getSelectedItemProps, getDropdownProps } = useMultipleSelection<
-    string
-  >({
-    selectedItems,
-    onSelectedItemsChange: (changes) => {
-      onChangeSelectedItems(changes.selectedItems ?? []);
-    },
-  });
-
-  const {
-    isOpen,
-    getToggleButtonProps,
-    getMenuProps,
-    toggleMenu,
-    getInputProps,
-    getComboboxProps,
-    highlightedIndex,
-    getItemProps,
-  } = useCombobox<string>({
-    inputValue,
-    defaultHighlightedIndex: 0, // after selection, highlight the first item.
-    selectedItem: null,
-    items: getFilteredItems(),
-    stateReducer: (_state, actionAndChanges) => {
-      const { changes, type } = actionAndChanges;
-      switch (type) {
-        case useCombobox.stateChangeTypes.InputKeyDownEnter:
-        case useCombobox.stateChangeTypes.ItemClick:
-        case useCombobox.stateChangeTypes.InputChange:
-          return {
-            ...changes,
-            isOpen: true,
-          };
-      }
-      return changes;
-    },
-    onStateChange: ({ inputValue, type, selectedItem }) => {
-      switch (type) {
-        case useCombobox.stateChangeTypes.InputChange:
-          setInputValue(inputValue ?? "");
-          break;
-        case useCombobox.stateChangeTypes.InputKeyDownEnter:
-        case useCombobox.stateChangeTypes.ItemClick:
-          if (selectedItem) {
-            setInputValue("");
-            onChangeSelectedItems([...selectedItems, selectedItem]);
-          }
-          break;
-        default:
-          break;
-      }
-    },
-  });
 
   function addNewOption() {
     if (inputValue.length > 0) {
@@ -254,10 +212,10 @@ export function MultiOptionsInput(props: IProps) {
       inputMinWidth: 100,
     });
     const tagItems = selectedItems
-      .map((selectedItem, index) => {
+      .map((selectedItem) => {
         return (
           <Tag
-            key={`selected-item-${index}`}
+            key={selectedItem}
             closable
             visible
             onClose={() => {
@@ -265,7 +223,6 @@ export function MultiOptionsInput(props: IProps) {
                 selectedItems.filter((i) => i !== selectedItem)
               );
             }}
-            {...getSelectedItemProps({ selectedItem, index })}
           >
             {selectedItem}
           </Tag>
@@ -289,6 +246,10 @@ export function MultiOptionsInput(props: IProps) {
     );
   }
 
+  function handleSelectOption(item: string) {
+    onChangeSelectedItems([...selectedItems, item]);
+  }
+
   function renderOptions() {
     const filteredItems = getFilteredItems();
     if (filteredItems.length === 0) return <Empty />;
@@ -304,8 +265,7 @@ export function MultiOptionsInput(props: IProps) {
           const item = filteredItems[index];
           return (
             <OptionsListItem
-              highlighted={highlightedIndex === index}
-              {...getItemProps({ item, index })}
+              onClick={() => handleSelectOption(item)}
               style={style}
             >
               <Typography.Text>{item}</Typography.Text>
@@ -320,30 +280,44 @@ export function MultiOptionsInput(props: IProps) {
   const isAddButtonDisabled =
     inputValue.length === 0 || selectedItems.includes(inputValue);
 
+  function handleChangeInput(e: React.ChangeEvent<HTMLInputElement>) {
+    setInputValue(e.target.value);
+  }
+
+  function handleClickToggleButton() {
+    setIsMenuOpen((o) => !o);
+  }
+
+  function handleClickInput() {
+    if (inputValue.length === 0) {
+      setIsMenuOpen((o) => !o);
+    }
+  }
+
   return (
     <Container>
       <SelectContainer>
         <BorderedBox ref={borderedBoxRef}>
           {renderSelectedTags()}
-          <TransparentInputWrapper {...getComboboxProps()}>
+          <TransparentInputWrapper>
             <TransparentInput
-              {...getInputProps({
-                ...getDropdownProps({ preventKeyAction: isOpen }),
-                onClick: toggleMenu,
-                onKeyDown: handleInputKeyDown,
-              })}
+              value={inputValue}
+              onChange={handleChangeInput}
+              onClick={handleClickInput}
+              onKeyDown={handleInputKeyDown}
               placeholder="Add Option"
             />
             <SelectMenuButton
-              {...getToggleButtonProps()}
+              onClick={handleClickToggleButton}
+              onKeyDown={handleClickToggleButton}
               aria-label="Toggle menu"
             >
-              {isOpen ? <CaretUpOutlined /> : <CaretDownOutlined />}
+              {isMenuOpen ? <CaretUpOutlined /> : <CaretDownOutlined />}
             </SelectMenuButton>
           </TransparentInputWrapper>
         </BorderedBox>
-        <OptionsModalContainer {...getMenuProps()}>
-          {isOpen ? <OptionsModal>{renderOptions()}</OptionsModal> : null}
+        <OptionsModalContainer ref={clickOutsideMenuRef}>
+          {isMenuOpen ? <OptionsModal>{renderOptions()}</OptionsModal> : null}
         </OptionsModalContainer>
       </SelectContainer>
       <Button

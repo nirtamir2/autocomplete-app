@@ -17,16 +17,25 @@ const Content = styled.div`
 `;
 
 const defaultOptions = [...Array(20)].map((_, index) => `option-${index}`);
+const modalBodyStyle = { padding: 0 };
 
+const GUTTER = 16;
 const MODAL_WIDTH = isSSR() ? 0 : window.innerWidth / 2;
 const MODAL_HEIGHT = isSSR() ? 0 : window.innerHeight / 2;
 
 export default function Subscribe() {
+  const router = useRouter();
+
   const [, setLocalStateSelectedItems] = useSelectedOptions();
   const [, setLocalStateOptions] = useOptions(defaultOptions);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const router = useRouter();
+
+  const [modalKey, setModalKey] = React.useState(0);
+
+  React.useEffect(() => {
+    setModalKey((key) => key + 1);
+  }, [isModalOpen]);
 
   function handleOpenModal() {
     setIsModalOpen(true);
@@ -65,14 +74,19 @@ export default function Subscribe() {
         <Modal
           centered
           visible={isModalOpen}
-          title="Modal"
           width={MODAL_WIDTH}
           footer={null}
+          closable={false}
+          bodyStyle={modalBodyStyle}
           onCancel={handleCloseModal}
         >
-          {isModalOpen ? (
-            <iframe src="/iframe" height={MODAL_HEIGHT / 2} width="100%" />
-          ) : null}
+          <iframe
+            key={modalKey}
+            src="/iframe"
+            height={MODAL_HEIGHT / 2 + 2 * GUTTER}
+            width="100%"
+            frameBorder={0}
+          />
         </Modal>
       </Content>
     </Layout>
