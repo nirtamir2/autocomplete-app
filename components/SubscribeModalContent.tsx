@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "antd";
 import styled from "styled-components";
-import { MultiOptionsInput } from "./MultiOptionsInput";
+import { MultiOptionsInput } from "../ui-core";
 
 interface IProps {
   onSave: (values: { selectedItems: string[]; options: string[] }) => void;

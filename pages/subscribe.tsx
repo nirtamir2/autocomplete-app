@@ -1,11 +1,10 @@
 import { Button, Modal } from "antd";
 import React from "react";
-import { Layout } from "../components/Layout";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import { useOptions } from "../components/hooks/useOptions";
-import { useSelectedOptions } from "../components/hooks/useSelectedOptions";
-import { isSSR } from "../utils/utils";
+import { Layout } from "../components";
+import { useOptions, useSelectedOptions } from "../state";
+import { isSSR } from "../utils";
 
 const Content = styled.div`
   height: 100%;

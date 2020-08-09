@@ -2,8 +2,8 @@ import React from "react";
 import { Button, Typography, List } from "antd";
 import Link from "next/link";
 import styled from "styled-components";
-import { Layout } from "../components/Layout";
-import { useSelectedOptions } from "../components/hooks/useSelectedOptions";
+import { Layout } from "../components";
+import { useSelectedOptions } from "../state";
 
 const Content = styled.div`
   padding: var(--gutter);

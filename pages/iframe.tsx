@@ -1,11 +1,10 @@
 import React from "react";
-import { SubscribeModalContent } from "../components/SubscribeModalContent";
-import { useSelectedOptions } from "../components/hooks/useSelectedOptions";
-import { useOptions } from "../components/hooks/useOptions";
 import styled from "styled-components";
+import { SubscribeModalContent } from "../components";
+import { useOptions, useSelectedOptions } from "../state";
 
 const Container = styled.div`
-  padding: var(--gutter) ;
+  padding: var(--gutter);
 `;
 
 export default function iframe() {
