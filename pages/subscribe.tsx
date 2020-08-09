@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { useOptions } from "../components/hooks/useOptions";
 import { useSelectedOptions } from "../components/hooks/useSelectedOptions";
 import { isSSR } from "../utils/utils";
-import { SubscribeModalContent } from "../components/SubscribeModalContent";
 
 const Content = styled.div`
   height: 100%;
@@ -19,16 +18,12 @@ const Content = styled.div`
 
 const defaultOptions = [...Array(20)].map((_, index) => `option-${index}`);
 
-const MODAL_WIDTH = isSSR() ? 0 : window.innerWidth;
+const MODAL_WIDTH = isSSR() ? 0 : window.innerWidth / 2;
+const MODAL_HEIGHT = isSSR() ? 0 : window.innerHeight / 2;
 
 export default function Subscribe() {
-  const [
-    localStorageSelectedItems,
-    setLocalStateSelectedItems,
-  ] = useSelectedOptions();
-  const [localStorageOptions, setLocalStateOptions] = useOptions(
-    defaultOptions
-  );
+  const [, setLocalStateSelectedItems] = useSelectedOptions();
+  const [, setLocalStateOptions] = useOptions(defaultOptions);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const router = useRouter();
@@ -41,17 +36,25 @@ export default function Subscribe() {
     setIsModalOpen(false);
   }
 
-  function handleSave({
-    selectedItems,
-    options,
-  }: {
-    selectedItems: string[];
-    options: string[];
-  }) {
-    setLocalStateSelectedItems(selectedItems);
-    setLocalStateOptions(options);
-    router.push("/");
-  }
+  React.useEffect(() => {
+    function onReceive(e: MessageEvent) {
+      const data = JSON.parse(e.data);
+      if (data.type === "form-submitted") {
+        const payload = data.payload as {
+          selectedItems: string[];
+          options: string[];
+        };
+        const { options, selectedItems } = payload;
+        setLocalStateSelectedItems(selectedItems);
+        setLocalStateOptions(options);
+        router.push("/");
+      }
+    }
+    window.addEventListener("message", onReceive);
+    return () => {
+      window.removeEventListener("message", onReceive);
+    };
+  }, [router]);
 
   return (
     <Layout>
@@ -63,18 +66,12 @@ export default function Subscribe() {
           centered
           visible={isModalOpen}
           title="Modal"
-          width={MODAL_WIDTH / 2}
+          width={MODAL_WIDTH}
           footer={null}
           onCancel={handleCloseModal}
         >
-          {/* NOTE: unmounting the component in order to reset state */}
-          {/* This can be done by setting different key too */}
           {isModalOpen ? (
-            <SubscribeModalContent
-              initialOptions={localStorageOptions}
-              initialSelectedItems={localStorageSelectedItems}
-              onSave={handleSave}
-            />
+            <iframe src="/iframe" height={MODAL_HEIGHT / 2} width="100%" />
           ) : null}
         </Modal>
       </Content>
